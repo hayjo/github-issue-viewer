@@ -21,7 +21,7 @@ const Search: () => Element = ({ onCancel }) => {
   const {
     selectedRepoList,
     onSelectRepo,
-    needNotice,
+    hasExceedLimit,
     onNoticeClick,
     notifyError,
   } = useContext(RepoContext);
@@ -94,7 +94,7 @@ const Search: () => Element = ({ onCancel }) => {
           )}
         </View>
       </ScrollView>
-      {needNotice && (
+      {hasExceedLimit && (
         <SnackBar onPress={() => onNoticeClick()} style={styles.noticeSnackBar}>
           <Text style={styles.noticeText}>{MESSAGE.MAX_REPO_COUNT}</Text>
         </SnackBar>

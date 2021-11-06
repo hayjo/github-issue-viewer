@@ -1,53 +1,79 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const useStoredList = ({ key, limit, notifyExceedLimit }) => {
-  const [list, setList] = useState([]);
-  const [error, setError] = useState(null);
-  const updateList = async newItem => {
-    const updated = list.includes(newItem)
-      ? list.filter(item => item !== newItem)
-      : [...list, newItem];
+function reducer(state, action) {
+  switch (action.type) {
+    case 'SYNC_STORAGE_DATA':
+      const storageData = action.payload;
 
-    if (updated.length > limit) {
-      notifyExceedLimit();
-      return;
-    }
+      return { ...state, list: storageData };
+    case 'UPDATE':
+      const newItem = action.payload;
+      const updated = state.list.includes(newItem)
+        ? state.list.filter(item => item !== newItem)
+        : [...state.list, newItem];
 
-    setList(updated);
-
-    try {
-      await AsyncStorage.setItem(key, JSON.stringify(updated));
-    } catch (err) {
-      setError(`Could not update storage for key: ${key} ${err}`);
-    }
-  };
-
-  useEffect(() => {
-    const pullFromStorage = async () => {
-      try {
-        const fromStorage = await AsyncStorage.getItem(key);
-
-        if (fromStorage) {
-          return JSON.parse(fromStorage);
-        }
-      } catch (err) {
-        setError(`Could not read from storage for key: ${key} ${err}`);
+      if (updated.length > state.limit) {
+        return { ...state, hasExceedLimit: true };
       }
 
-      return null;
+      return { ...state, list: updated, hasExceedLimit: false };
+    case 'SET_ERROR':
+      const error = action.payload;
+
+      return { ...state, error };
+    case 'CONFIRM_LIMIT_EXCEED':
+      return { ...state, hasExceedLimit: false };
+    default:
+      return state;
+  }
+}
+
+const useStoredList = ({ key, limit }) => {
+  const [{ list, hasExceedLimit, error }, dispatch] = useReducer(reducer, {
+    list: [],
+    hasExceedLimit: false,
+    limit,
+    error: '',
+  });
+
+  const updateList = async item => dispatch({ type: 'UPDATE', payload: item });
+  const confirmLimitNotice = () => dispatch({ type: 'CONFIRM_LIMIT_EXCEED' });
+
+  useEffect(() => {
+    const syncWithStorage = async () => {
+      const fromStorage = await AsyncStorage.getItem(key);
+
+      if (!fromStorage) {
+        return;
+      }
+
+      try {
+        dispatch({
+          type: 'SYNC_STORAGE_DATA',
+          payload: JSON.parse(fromStorage),
+        });
+      } catch (err) {
+        dispatch({ type: 'SET_ERROR', payload: err.message });
+      }
     };
 
-    const initializeListFromStorage = async () => {
-      const storageData = await pullFromStorage();
-
-      setList(storageData || []);
-    };
-
-    initializeListFromStorage();
+    syncWithStorage();
   }, [key]);
 
-  return [list, updateList, error];
+  useEffect(() => {
+    const updateStorage = async () => {
+      try {
+        await AsyncStorage.setItem(key, JSON.stringify(list));
+      } catch (err) {
+        dispatch({ type: 'SET_ERROR', payload: err.message });
+      }
+    };
+
+    updateStorage();
+  }, [key, list]);
+
+  return { list, updateList, hasExceedLimit, error, confirmLimitNotice };
 };
 
 export default useStoredList;

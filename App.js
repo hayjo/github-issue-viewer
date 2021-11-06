@@ -25,34 +25,36 @@ enableScreens(true);
 const Stack = createNativeStackNavigator();
 
 const App: () => Element = () => {
-  const [needNotice, setNeedNotice] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const notifyRepoLimit = () => setNeedNotice(true);
-  const [repoList, updateRepoList, storageError] = useStoredList({
+  const {
+    list: repoList,
+    updateList: updateRepoList,
+    hasExceedLimit,
+    confirmLimitNotice,
+    error,
+  } = useStoredList({
     key: 'repoList',
     limit: LIMIT.REPO_COUNT,
-    notifyExceedLimit: notifyRepoLimit,
   });
+  const [hasError, setHasError] = useState(false);
+
   const notifyError = err => {
     console.log(err);
     setHasError(true);
   };
-  const handleNoticeClick = () => setNeedNotice(false);
 
   useEffect(() => {
-    if (storageError) {
-      console.log(storageError);
+    if (error) {
       setHasError(true);
     }
-  }, [storageError]);
+  }, [error]);
 
   return (
     <RepoContext.Provider
       value={{
         selectedRepoList: repoList,
+        hasExceedLimit,
         onSelectRepo: updateRepoList,
-        needNotice,
-        onNoticeClick: handleNoticeClick,
+        onNoticeClick: confirmLimitNotice,
         notifyError,
       }}>
       {hasError ? (
