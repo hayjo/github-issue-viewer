@@ -15,6 +15,7 @@ import { enableScreens } from 'react-native-screens';
 import useStoredList from './hooks/useStoredList';
 import { RepoContext } from './context';
 import Home from './Components/Home';
+import Repository from './Components/Repository';
 import Error from './Components/Error';
 import { LIMIT } from './constants';
 
@@ -61,6 +62,7 @@ const App: () => Element = () => {
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Home">
             <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="Repository" component={Repository} />
           </Stack.Navigator>
         </NavigationContainer>
       )}
