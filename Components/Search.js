@@ -11,11 +11,13 @@ import {
 } from 'react-native';
 import type { Element } from 'react';
 import Icon from 'react-native-vector-icons/Octicons';
-import RepoCard from './RepoCard';
+import Card from './Card';
 import SnackBar from './SnackBar';
 import { RepoContext } from '../context';
 import { searchRepoByQuery } from '../api';
-import { COLORS, MESSAGE } from '../constants';
+import { COLORS, MESSAGE, SIZE } from '../constants';
+
+Icon.loadFont();
 
 const Search: () => Element = ({ onCancel }) => {
   const {
@@ -80,16 +82,24 @@ const Search: () => Element = ({ onCancel }) => {
                   {resultCount.toLocaleString()} repository results
                 </Text>
               </View>
-              {repoList &&
-                repoList.map(({ id, full_name: fullName, description }) => (
-                  <RepoCard
-                    key={id}
-                    title={fullName}
-                    description={description}
-                    onPress={() => onSelectRepo(fullName)}
-                    selected={selectedRepoList.includes(fullName)}
-                  />
-                ))}
+              {repoList.map(({ id, full_name: fullName, description }) => (
+                <Card key={id} onPress={() => onSelectRepo(fullName)}>
+                  <Icon style={styles.repoIcon} name="repo" size={SIZE.ICON} />
+                  <View style={styles.cardContent}>
+                    <Text style={styles.cardTitle}>{fullName}</Text>
+                    <Text numberOfLines={2}>{description}</Text>
+                  </View>
+                  {selectedRepoList.includes(fullName) ? (
+                    <View style={styles.checkIcon}>
+                      <Icon
+                        name="check"
+                        size={SIZE.ICON}
+                        color={COLORS.SELECTED}
+                      />
+                    </View>
+                  ) : null}
+                </Card>
+              ))}
             </View>
           )}
         </View>
@@ -142,6 +152,26 @@ const styles = StyleSheet.create({
   noticeText: {
     color: '#ffffff',
     textAlign: 'center',
+  },
+  repoIcon: {
+    marginLeft: 2,
+    marginRight: 8,
+    marginVertical: 5,
+    color: COLORS.ICON,
+  },
+  cardContent: {
+    padding: 2,
+    flex: 1,
+    overflow: 'hidden',
+  },
+  cardTitle: {
+    color: COLORS.TITLE,
+    fontSize: 16,
+  },
+  checkIcon: {
+    marginVertical: 5,
+    marginLeft: 4,
+    alignSelf: 'flex-start',
   },
 });
 
