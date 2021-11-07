@@ -14,6 +14,7 @@ const COLORS = {
   ICON: '#6a737d',
   TITLE: '#0969da',
   SUBTITLE: '#24292f',
+  TEXT: '#57606a',
   BORDER: '#1b1f2426',
   SEARCH_BACKGROUND: '#1b1f241a',
   NOTICE: '#c92e35d9',
