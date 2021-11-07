@@ -17,6 +17,7 @@ const COLORS = {
   BORDER: '#1b1f2426',
   SEARCH_BACKGROUND: '#1b1f241a',
   NOTICE: '#c92e35d9',
+  DEFAULT: '#ffffff',
 };
 
 const SIZE = {

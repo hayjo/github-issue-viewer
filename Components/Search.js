@@ -104,11 +104,12 @@ const Search: () => Element = ({ onCancel }) => {
           )}
         </View>
       </ScrollView>
-      {hasExceedLimit && (
-        <SnackBar onPress={() => onNoticeClick()} style={styles.noticeSnackBar}>
-          <Text style={styles.noticeText}>{MESSAGE.MAX_REPO_COUNT}</Text>
-        </SnackBar>
-      )}
+      {hasExceedLimit ? (
+        <SnackBar
+          onPress={() => onNoticeClick()}
+          text={MESSAGE.MAX_REPO_COUNT}
+        />
+      ) : null}
     </SafeAreaView>
   );
 };
@@ -143,15 +144,6 @@ const styles = StyleSheet.create({
   resultCount: {
     fontSize: 16,
     color: COLORS.SUBTITLE,
-  },
-  noticeSnackBar: {
-    padding: 10,
-    backgroundColor: COLORS.NOTICE,
-    borderRadius: 4,
-  },
-  noticeText: {
-    color: '#ffffff',
-    textAlign: 'center',
   },
   repoIcon: {
     marginLeft: 2,
