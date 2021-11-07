@@ -86,8 +86,8 @@ const Search: () => Element = ({ onCancel }) => {
                     key={id}
                     title={fullName}
                     description={description}
-                    onPress={() => onSelectRepo(id)}
-                    selected={selectedRepoList.includes(id)}
+                    onPress={() => onSelectRepo(fullName)}
+                    selected={selectedRepoList.includes(fullName)}
                   />
                 ))}
             </View>
