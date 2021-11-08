@@ -7,6 +7,7 @@ const MESSAGE = {
 
 const LIMIT = {
   REPO_COUNT: 4,
+  ISSUE_PER_PAGE: 5,
 };
 
 const COLORS = {

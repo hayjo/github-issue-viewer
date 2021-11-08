@@ -2,6 +2,7 @@ import { mockSearchRepoResult, mockIssues } from './mockData';
 import { MESSAGE } from '../constants';
 
 const useMock = false;
+const MOCK_DELAY = 500;
 
 async function searchRepoByQuery(query) {
   if (useMock) {
@@ -36,11 +37,14 @@ async function searchRepoByQuery(query) {
 
 async function getIssuesByRepoFullName(fullName, page = 1) {
   if (useMock) {
+    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
+
     return new Promise(resolve =>
       resolve(
         mockIssues.map(issue => ({
           ...issue,
           url: issue.html_url,
+          number: issue.number * page,
           repoName: fullName,
           createdAt: issue.created_at,
           assignees: issue.assignees.map(({ avatar_url }) => avatar_url),
@@ -51,7 +55,7 @@ async function getIssuesByRepoFullName(fullName, page = 1) {
 
   try {
     const response = await fetch(
-      `https://api.github.com/repos/${fullName}/issues?per_page=10&page=2`,
+      `https://api.github.com/repos/${fullName}/issues?per_page=100&page=${page}`,
     );
 
     if (!response.ok) {

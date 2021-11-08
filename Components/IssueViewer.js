@@ -1,25 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Element } from 'react';
 import {
   ScrollView,
   Linking,
+  ActivityIndicator,
   View,
   Image,
   Text,
+  Button,
   StyleSheet,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Card from './Card';
 import Chip from './Chip';
 import SnackBar from './SnackBar';
+import useAggregatedIssueList from '../hooks/useAggregatedIssueList';
 import { parseDate, getContrastYIQ } from '../utils';
-import { getIssuesByRepoFullName } from '../api';
-import { COLORS } from '../constants';
+import { COLORS, LIMIT } from '../constants';
 
 Icon.loadFont();
 
-const IssueViewer: () => Element = ({ repoList }) => {
-  const [issueList, setIssueList] = useState([]);
+const IssueViewer: () => Element = () => {
+  const {
+    list,
+    page,
+    pageList,
+    isFetching,
+    fetchingError,
+    movePrevPage,
+    moveNextPage,
+    movePage,
+  } = useAggregatedIssueList({ perPage: LIMIT.ISSUE_PER_PAGE });
   const [error, setError] = useState('');
   const handlePress = async url => {
     const supported = await Linking.canOpenURL(url);
@@ -37,22 +48,34 @@ const IssueViewer: () => Element = ({ repoList }) => {
   };
 
   useEffect(() => {
-    const searchIssues = async () => {
-      const searched = await Promise.all(
-        repoList.map(name => getIssuesByRepoFullName(name)),
-      );
-
-      setIssueList(searched.flat());
-    };
-
-    searchIssues();
-  }, [repoList]);
+    if (fetchingError) {
+      setError(fetchingError);
+    }
+  }, [fetchingError]);
 
   return (
     <View>
+      <View style={styles.pageNavigator}>
+        {isFetching ? (
+          <ActivityIndicator />
+        ) : (
+          <>
+            <Button title="이전" onPress={movePrevPage} />
+            {pageList.map(pageNumber => (
+              <Button
+                key={pageNumber}
+                title={String(pageNumber + 1)}
+                color={pageNumber === page ? COLORS.NOTICE : COLORS.TEXT}
+                onPress={() => movePage(pageNumber)}
+              />
+            ))}
+            <Button title="다음" onPress={moveNextPage} />
+          </>
+        )}
+      </View>
       <ScrollView style={styles.card}>
         <View style={styles.issueSection}>
-          {issueList.map(
+          {list.map(
             ({
               repoName,
               number,
@@ -133,7 +156,7 @@ const IssueViewer: () => Element = ({ repoList }) => {
       </ScrollView>
       {error ? (
         <SnackBar
-          onPress={() => setError(false)}
+          onPress={() => {}}
           style={styles.noticeSnackBar}
           text={error}
         />
@@ -143,6 +166,13 @@ const IssueViewer: () => Element = ({ repoList }) => {
 };
 
 const styles = StyleSheet.create({
+  pageNavigator: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 45,
+  },
   issueSection: {
     paddingHorizontal: 16,
   },
