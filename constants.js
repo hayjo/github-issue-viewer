@@ -7,6 +7,7 @@ const MESSAGE = {
 
 const LIMIT = {
   REPO_COUNT: 4,
+  ISSUE_PER_PAGE: 5,
 };
 
 const COLORS = {
@@ -14,9 +15,11 @@ const COLORS = {
   ICON: '#6a737d',
   TITLE: '#0969da',
   SUBTITLE: '#24292f',
+  TEXT: '#57606a',
   BORDER: '#1b1f2426',
   SEARCH_BACKGROUND: '#1b1f241a',
   NOTICE: '#c92e35d9',
+  DEFAULT: '#ffffff',
 };
 
 const SIZE = {

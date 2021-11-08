@@ -1,7 +1,8 @@
 import React, { useRef, useEffect } from 'react';
-import { Animated, Pressable, View, StyleSheet } from 'react-native';
+import { Animated, Pressable, View, Text, StyleSheet } from 'react-native';
+import { COLORS } from '../constants';
 
-const SnackBar = ({ onPress, children, style }) => {
+const SnackBar = ({ onPress, style, text, textStyle }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -21,7 +22,9 @@ const SnackBar = ({ onPress, children, style }) => {
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <Pressable onPress={onPress}>
-        <View style={style}>{children}</View>
+        <View style={[styles.defaultSnackBar, style]}>
+          <Text style={[styles.defaultText, textStyle]}>{text}</Text>
+        </View>
       </Pressable>
     </Animated.View>
   );
@@ -32,6 +35,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     bottom: '50%',
+  },
+  defaultSnackBar: {
+    padding: 10,
+    backgroundColor: COLORS.NOTICE,
+    borderRadius: 4,
+  },
+  defaultText: {
+    color: COLORS.DEFAULT,
+    textAlign: 'center',
   },
 });
 
