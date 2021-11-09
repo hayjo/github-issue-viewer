@@ -1,17 +1,19 @@
 import { mockSearchRepoResult, mockIssues } from './mockData';
-import { MESSAGE } from '../constants';
+import { MESSAGE, LIMIT } from '../constants';
 
 const useMock = false;
 const MOCK_DELAY = 500;
 
-async function searchRepoByQuery(query) {
+async function searchRepoByQuery(query, page) {
   if (useMock) {
+    await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
+
     return new Promise(resolve => resolve(mockSearchRepoResult));
   }
 
   try {
     const response = await fetch(
-      `https://api.github.com/search/repositories?q=${query}&sort=stars&order=desc`,
+      `https://api.github.com/search/repositories?q=${query}&sort=stars&order=desc&per_page=${LIMIT.SEARCH_REPO_PER_PAGE}&page=${page}`,
     );
 
     if (!response.ok) {
