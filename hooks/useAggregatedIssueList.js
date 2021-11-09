@@ -175,17 +175,7 @@ const useAggregatedIssueList = ({ perPage }) => {
       fetchingInfos: {},
       storage: [],
     });
-  const startPage = Math.floor(page / perPage) * perPage;
-  const endPage = Math.min(
-    startPage + perPage,
-    Math.ceil(buffer.length / perPage),
-  );
-  const pageList =
-    startPage < endPage
-      ? Array.from({ length: endPage - startPage }).map(
-          (_, index) => index + startPage,
-        )
-      : [startPage];
+
   const isFetching = Object.values(fetchingInfos).some(info =>
     Boolean(info.isFetching),
   );
@@ -200,7 +190,7 @@ const useAggregatedIssueList = ({ perPage }) => {
   }, [selectedRepoList]);
 
   useEffect(() => {
-    const isBufferEnough = buffer.length > endPage * perPage;
+    const isBufferEnough = buffer.length > (page + 1) * perPage;
 
     if (isBufferEnough) {
       return;
@@ -240,12 +230,11 @@ const useAggregatedIssueList = ({ perPage }) => {
     };
 
     searchIssues();
-  }, [buffer.length, latestSafeDate, fetchingInfos, page, endPage, perPage]);
+  }, [buffer.length, latestSafeDate, fetchingInfos, page, perPage]);
 
   return {
     list: buffer.slice(page * perPage, (page + 1) * perPage),
     page,
-    pageList,
     isFetching,
     fetchingError: error,
     movePrevPage,

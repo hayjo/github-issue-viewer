@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import type { Element } from 'react';
 import {
+  SafeAreaView,
   ScrollView,
   Linking,
   ActivityIndicator,
   View,
   Image,
   Text,
-  Button,
   StyleSheet,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -20,11 +20,10 @@ import { COLORS, LIMIT } from '../constants';
 
 Icon.loadFont();
 
-const IssueViewer: () => Element = () => {
+const IssueViewer: () => Element = ({ navigation }) => {
   const {
     list,
     page,
-    pageList,
     isFetching,
     fetchingError,
     movePrevPage,
@@ -54,26 +53,8 @@ const IssueViewer: () => Element = () => {
   }, [fetchingError]);
 
   return (
-    <View>
-      <View style={styles.pageNavigator}>
-        {isFetching ? (
-          <ActivityIndicator />
-        ) : (
-          <>
-            <Button title="이전" onPress={movePrevPage} />
-            {pageList.map(pageNumber => (
-              <Button
-                key={pageNumber}
-                title={String(pageNumber + 1)}
-                color={pageNumber === page ? COLORS.NOTICE : COLORS.TEXT}
-                onPress={() => movePage(pageNumber)}
-              />
-            ))}
-            <Button title="다음" onPress={moveNextPage} />
-          </>
-        )}
-      </View>
-      <ScrollView style={styles.card}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.issueListContainer}>
         <View style={styles.issueSection}>
           {list.map(
             ({
@@ -139,7 +120,7 @@ const IssueViewer: () => Element = () => {
                           <Icon
                             name="comment-multiple-outline"
                             size={14}
-                            color="#57606a"
+                            color={COLORS.TEXT}
                             style={styles.commentIcon}
                           />
                         }
@@ -154,6 +135,24 @@ const IssueViewer: () => Element = () => {
           )}
         </View>
       </ScrollView>
+      <View style={styles.pageNavigator}>
+        {isFetching ? (
+          <ActivityIndicator />
+        ) : (
+          <>
+            <Text onPress={() => movePage(0)}>
+              <Icon name="chevron-double-left" size={24} color={COLORS.TEXT} />
+            </Text>
+            <Text style={styles.chevron} onPress={movePrevPage}>
+              <Icon name="chevron-left" size={24} color={COLORS.TEXT} />
+            </Text>
+            <Text>page {page + 1}</Text>
+            <Text style={styles.chevron} onPress={moveNextPage}>
+              <Icon name="chevron-right" size={24} color={COLORS.TEXT} />
+            </Text>
+          </>
+        )}
+      </View>
       {error ? (
         <SnackBar
           onPress={() => {}}
@@ -161,17 +160,23 @@ const IssueViewer: () => Element = () => {
           text={error}
         />
       ) : null}
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: COLORS.DEFAULT,
+    height: '100%',
+    width: '100%',
+  },
   pageNavigator: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 45,
+  },
+  issueListContainer: {
+    flex: 1,
   },
   issueSection: {
     paddingHorizontal: 16,
@@ -198,14 +203,14 @@ const styles = StyleSheet.create({
   repoName: {
     marginRight: 4,
     marginBottom: 4,
-    color: '#57606a',
+    color: COLORS.TEXT,
   },
   time: {
     marginLeft: 8,
-    color: '#57606a',
+    color: COLORS.TEXT,
   },
   issueNumber: {
-    color: '#57606a',
+    color: COLORS.TEXT,
   },
   issueTitle: {
     flex: 1,
@@ -252,6 +257,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.DEFAULT,
     backgroundColor: COLORS.SEARCH_BACKGROUND,
+  },
+  chevron: {
+    marginHorizontal: 20,
+    marginVertical: 8,
   },
 });
 

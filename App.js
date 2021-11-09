@@ -8,17 +8,20 @@
 
 import React, { useState, useEffect } from 'react';
 import type { Element } from 'react';
+import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { enableScreens } from 'react-native-screens';
+import Icon from 'react-native-vector-icons/Octicons';
 
 import useStoredList from './hooks/useStoredList';
 import { RepoContext } from './context';
-import Home from './Components/Home';
+import IssueViewer from './Components/IssueViewer';
 import Repository from './Components/Repository';
 import Error from './Components/Error';
-import { LIMIT } from './constants';
+import { LIMIT, SIZE } from './constants';
 
+Icon.loadFont();
 enableScreens(true);
 
 const Stack = createNativeStackNavigator();
@@ -60,8 +63,18 @@ const App: () => Element = () => {
         <Error />
       ) : (
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="Home">
-            <Stack.Screen name="Home" component={Home} />
+          <Stack.Navigator initialRouteName="Issue">
+            <Stack.Screen
+              name="Issue"
+              component={IssueViewer}
+              options={({ navigation }) => ({
+                headerRight: () => (
+                  <Text onPress={() => navigation.navigate('Repository')}>
+                    <Icon name="repo" size={SIZE.ICON} />
+                  </Text>
+                ),
+              })}
+            />
             <Stack.Screen name="Repository" component={Repository} />
           </Stack.Navigator>
         </NavigationContainer>
