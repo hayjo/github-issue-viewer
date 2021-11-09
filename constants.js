@@ -8,6 +8,8 @@ const MESSAGE = {
 const LIMIT = {
   REPO_COUNT: 4,
   ISSUE_PER_PAGE: 5,
+  SEARCH_DEBOUNCING_TIME: 300,
+  SEARCH_REPO_PER_PAGE: 30,
 };
 
 const COLORS = {

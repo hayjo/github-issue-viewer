@@ -1,7 +1,7 @@
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   SafeAreaView,
-  ScrollView,
+  FlatList,
   ActivityIndicator,
   View,
   Text,
@@ -11,11 +11,12 @@ import {
 } from 'react-native';
 import type { Element } from 'react';
 import Icon from 'react-native-vector-icons/Octicons';
+import debounce from 'lodash.debounce';
 import Card from './Card';
 import SnackBar from './SnackBar';
 import { RepoContext } from '../context';
 import { searchRepoByQuery } from '../api';
-import { COLORS, MESSAGE, SIZE } from '../constants';
+import { COLORS, MESSAGE, SIZE, LIMIT } from '../constants';
 
 Icon.loadFont();
 
@@ -28,82 +29,111 @@ const Search: () => Element = ({ onCancel }) => {
     notifyError,
   } = useContext(RepoContext);
   const [searchQuery, setSearchQuery] = useState('');
+  const [nextPage, setNextPage] = useState(1);
   const [resultCount, setResultCount] = useState(0);
   const [repoList, setRepoList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const ref = useRef(null);
+  const debouncingTime = nextPage === 1 ? 0 : LIMIT.SEARCH_DEBOUNCING_TIME;
 
   const onChangeSearch = query => setSearchQuery(query);
 
-  const searchRepositories = useMemo(
-    () => async query => {
-      if (!query) {
-        return;
+  const searchRepositories = debounce(async (query, pageNumber) => {
+    if (!query) {
+      return;
+    }
+
+    if (isLoading) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const searchResult = await searchRepoByQuery(query, pageNumber);
+      const { totalCount, items } = searchResult;
+
+      setRepoList(prevList => [...prevList, ...items]);
+      setResultCount(totalCount);
+
+      if (items.length) {
+        setNextPage(pageNumber + 1);
       }
+    } catch (err) {
+      notifyError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, debouncingTime);
 
-      setIsLoading(true);
+  const renderItem = ({ item }) => {
+    const { id, name, owner, description } = item;
+    const { id: ownerId, login: ownerName } = owner;
+    const fullName = `${ownerName}/${name}`;
 
-      try {
-        const searchResult = await searchRepoByQuery(query);
-        const { totalCount, items } = searchResult;
+    return (
+      <Card
+        key={id}
+        onPress={() => onSelectRepo({ id, name, ownerId, ownerName })}>
+        <Icon style={styles.repoIcon} name="repo" size={SIZE.ICON} />
+        <View style={styles.cardContent}>
+          <Text style={styles.cardTitle}>{fullName}</Text>
+          <Text numberOfLines={2}>{description}</Text>
+        </View>
+        {selectedRepoList.find(repo => repo.id === id) ? (
+          <View style={styles.checkIcon}>
+            <Icon name="check" size={SIZE.ICON} color={COLORS.SELECTED} />
+          </View>
+        ) : null}
+      </Card>
+    );
+  };
 
-        setRepoList(items);
-        setResultCount(totalCount);
-      } catch (err) {
-        notifyError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [notifyError],
+  const listHeader = (
+    <Text style={styles.resultCount}>
+      {resultCount.toLocaleString()} repository results
+    </Text>
   );
 
+  const listFooter = isLoading ? <ActivityIndicator /> : null;
+
+  useEffect(() => {
+    if (ref?.current) {
+      ref.current.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    setRepoList([]);
+    setNextPage(1);
+  }, [searchQuery]);
+
   return (
-    <SafeAreaView>
-      <ScrollView contentInsetAdjustmentBehavior="automatic">
-        <View>
-          <View style={styles.searchBarContainer}>
-            <View style={styles.searchBar}>
-              <Icon name="search" style={styles.searchIcon} size={16} />
-              <TextInput
-                placeholder="Search Repository"
-                onChangeText={onChangeSearch}
-                value={searchQuery}
-                onSubmitEditing={() => searchRepositories(searchQuery)}
-              />
-            </View>
-            <Button title="Cancel" onPress={onCancel} />
-          </View>
-          {isLoading ? (
-            <ActivityIndicator />
-          ) : (
-            <View style={styles.cardSection}>
-              <View style={styles.resultCountContainer}>
-                <Text style={styles.resultCount}>
-                  {resultCount.toLocaleString()} repository results
-                </Text>
-              </View>
-              {repoList.map(({ id, full_name: fullName, description }) => (
-                <Card key={id} onPress={() => onSelectRepo(fullName)}>
-                  <Icon style={styles.repoIcon} name="repo" size={SIZE.ICON} />
-                  <View style={styles.cardContent}>
-                    <Text style={styles.cardTitle}>{fullName}</Text>
-                    <Text numberOfLines={2}>{description}</Text>
-                  </View>
-                  {selectedRepoList.includes(fullName) ? (
-                    <View style={styles.checkIcon}>
-                      <Icon
-                        name="check"
-                        size={SIZE.ICON}
-                        color={COLORS.SELECTED}
-                      />
-                    </View>
-                  ) : null}
-                </Card>
-              ))}
-            </View>
-          )}
+    <SafeAreaView style={styles.container}>
+      <View style={styles.searchBarContainer}>
+        <View style={styles.searchBar}>
+          <Icon name="search" style={styles.searchIcon} size={16} />
+          <TextInput
+            ref={ref}
+            placeholder="Search Repository"
+            onChangeText={onChangeSearch}
+            value={searchQuery}
+            onSubmitEditing={() => searchRepositories(searchQuery, nextPage)}
+          />
         </View>
-      </ScrollView>
+        <Button title="Cancel" onPress={onCancel} />
+      </View>
+      <View style={styles.mainContainer}>
+        <FlatList
+          data={repoList}
+          style={styles.cardContainer}
+          renderItem={renderItem}
+          keyExtractor={({ id }) => id}
+          ListHeaderComponent={listHeader}
+          ListFooterComponent={listFooter}
+          onEndReached={() => searchRepositories(searchQuery, nextPage)}
+        />
+      </View>
       {hasExceedLimit ? (
         <SnackBar
           onPress={() => onNoticeClick()}
@@ -115,6 +145,17 @@ const Search: () => Element = ({ onCancel }) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    height: '100%',
+    width: '100%',
+    flex: 1,
+  },
+  searchBarContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 12,
+    marginHorizontal: 12,
+  },
   searchBar: {
     flexDirection: 'row',
     flex: 1,
@@ -125,23 +166,19 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     paddingRight: 4,
   },
-  searchBarContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginHorizontal: 12,
-  },
   searchIcon: {
     alignSelf: 'center',
     marginHorizontal: 8,
     color: COLORS.ICON,
   },
-  cardSection: {
+  mainContainer: {
+    flex: 1,
+  },
+  cardContainer: {
     paddingHorizontal: 16,
   },
-  resultCountContainer: {
-    marginVertical: 16,
-  },
   resultCount: {
+    marginBottom: 12,
     fontSize: 16,
     color: COLORS.SUBTITLE,
   },

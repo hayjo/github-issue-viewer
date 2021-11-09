@@ -9,8 +9,8 @@ function reducer(state, action) {
       return { ...state, list: storageData };
     case 'UPDATE':
       const newItem = action.payload;
-      const updated = state.list.includes(newItem)
-        ? state.list.filter(item => item !== newItem)
+      const updated = state.list.find(({ id }) => newItem.id === id)
+        ? state.list.filter(({ id }) => newItem.id !== id)
         : [...state.list, newItem];
 
       if (updated.length > state.limit) {

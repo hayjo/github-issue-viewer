@@ -2,6 +2,10 @@ import { useEffect, useContext, useReducer } from 'react';
 import { RepoContext } from '../context';
 import { getIssuesByRepoFullName } from '../api';
 
+function getFullName({ ownerName, name }) {
+  return `${ownerName}/${name}`;
+}
+
 function reducer(state, action) {
   // by index, 1 page get [0, 10), 2 page get [10, 20)
   // if buffer length 20, max page should be 1 [0, 10), [10, 20)
@@ -37,17 +41,18 @@ function reducer(state, action) {
         page: state.page + 1,
       };
     case 'ADD_DATA':
-      const { data, target } = action.payload;
+      const { data, targetId } = action.payload;
 
-      if (!state.fetchingInfos[target]) {
+      if (!state.fetchingInfos[targetId]) {
         return state;
       }
 
       const fetchingInfos = {
         ...state.fetchingInfos,
-        [target]: {
+        [targetId]: {
+          ...state.fetchingInfos[targetId],
           latestDate: data[data.length - 1].createdAt,
-          page: state.fetchingInfos[target].page + 1,
+          page: state.fetchingInfos[targetId].page + 1,
           isFetching: false,
         },
       };
@@ -88,11 +93,14 @@ function reducer(state, action) {
       const isAdded =
         repoList.length > Object.values(state.fetchingInfos).length;
 
-      repoList.forEach(repoName => {
-        updatedFetchingInfos[repoName] = state.fetchingInfos[repoName] || {
+      repoList.forEach(repoInfo => {
+        updatedFetchingInfos[repoInfo.id] = state.fetchingInfos[
+          repoInfo.id
+        ] || {
           latestDate: currentTimeString,
           page: 1,
           isFetching: false,
+          fullName: getFullName(repoInfo),
         };
       });
 
@@ -100,9 +108,7 @@ function reducer(state, action) {
         return {
           ...state,
           buffer: [],
-          storage: [...state.buffer, ...state.storage].filter(({ repoName }) =>
-            repoList.includes(repoName),
-          ),
+          storage: [...state.buffer, ...state.storage],
           latestSafeDate: currentTimeString,
           fetchingInfos: updatedFetchingInfos,
           page: 0,
@@ -111,19 +117,19 @@ function reducer(state, action) {
 
       return {
         ...state,
-        buffer: [...state.buffer].filter(({ repoName }) =>
-          repoList.includes(repoName),
+        buffer: [...state.buffer].filter(({ fullName }) =>
+          repoList.find(repoInfo => fullName === getFullName(repoInfo)),
         ),
-        storage: [...state.storage].filter(({ repoName }) =>
-          repoList.includes(repoName),
+        storage: [...state.storage].filter(({ fullName }) =>
+          repoList.find(repoInfo => fullName === getFullName(repoInfo)),
         ),
         fetchingInfos: updatedFetchingInfos,
         page: 0,
       };
     case 'SET_FETCHING':
-      const fetchingRepoName = action.payload;
+      const fetchingRepoId = action.payload;
 
-      if (!state.fetchingInfos[fetchingRepoName]) {
+      if (!state.fetchingInfos[fetchingRepoId]) {
         return state;
       }
 
@@ -131,16 +137,16 @@ function reducer(state, action) {
         ...state,
         fetchingInfos: {
           ...state.fetchingInfos,
-          [fetchingRepoName]: {
-            ...state.fetchingInfos[fetchingRepoName],
+          [fetchingRepoId]: {
+            ...state.fetchingInfos[fetchingRepoId],
             isFetching: true,
           },
         },
       };
     case 'MARK_ALL_FETCHED':
-      const targetRepoName = action.payload;
+      const targetRepoId = action.payload;
 
-      if (!state.fetchingInfos[targetRepoName]) {
+      if (!state.fetchingInfos[targetRepoId]) {
         return state;
       }
 
@@ -148,8 +154,8 @@ function reducer(state, action) {
         ...state,
         fetchingInfos: {
           ...state.fetchingInfos,
-          [targetRepoName]: {
-            ...state.fetchingInfos[targetRepoName],
+          [targetRepoId]: {
+            ...state.fetchingInfos[targetRepoId],
             isFetching: false,
             hasFetchedAll: true,
           },
@@ -175,17 +181,7 @@ const useAggregatedIssueList = ({ perPage }) => {
       fetchingInfos: {},
       storage: [],
     });
-  const startPage = Math.floor(page / perPage) * perPage;
-  const endPage = Math.min(
-    startPage + perPage,
-    Math.ceil(buffer.length / perPage),
-  );
-  const pageList =
-    startPage < endPage
-      ? Array.from({ length: endPage - startPage }).map(
-          (_, index) => index + startPage,
-        )
-      : [startPage];
+
   const isFetching = Object.values(fetchingInfos).some(info =>
     Boolean(info.isFetching),
   );
@@ -200,7 +196,7 @@ const useAggregatedIssueList = ({ perPage }) => {
   }, [selectedRepoList]);
 
   useEffect(() => {
-    const isBufferEnough = buffer.length > endPage * perPage;
+    const isBufferEnough = buffer.length > (page + 1) * perPage;
 
     if (isBufferEnough) {
       return;
@@ -209,24 +205,27 @@ const useAggregatedIssueList = ({ perPage }) => {
     const searchIssues = async () => {
       const targets = [];
 
-      for (const [target, info] of Object.entries(fetchingInfos)) {
+      for (const [targetId, info] of Object.entries(fetchingInfos)) {
         if (info.latestDate >= latestSafeDate && !info.hasFetchedAll) {
           const fetchIssues = async () => {
             if (info.isFetching) {
               return;
             }
 
-            dispatch({ type: 'SET_FETCHING', payload: target });
+            dispatch({ type: 'SET_FETCHING', payload: targetId });
 
             try {
-              const data = await getIssuesByRepoFullName(target, info.page);
+              const data = await getIssuesByRepoFullName(
+                info.fullName,
+                info.page,
+              );
 
               if (!data.length) {
-                dispatch({ type: 'MARK_ALL_FETCHED', payload: target });
+                dispatch({ type: 'MARK_ALL_FETCHED', payload: targetId });
                 return;
               }
 
-              dispatch({ type: 'ADD_DATA', payload: { data, target } });
+              dispatch({ type: 'ADD_DATA', payload: { data, targetId } });
             } catch (err) {
               dispatch({ type: 'SET_ERROR', payload: err.message });
             }
@@ -240,12 +239,11 @@ const useAggregatedIssueList = ({ perPage }) => {
     };
 
     searchIssues();
-  }, [buffer.length, latestSafeDate, fetchingInfos, page, endPage, perPage]);
+  }, [buffer.length, latestSafeDate, fetchingInfos, page, perPage]);
 
   return {
     list: buffer.slice(page * perPage, (page + 1) * perPage),
     page,
-    pageList,
     isFetching,
     fetchingError: error,
     movePrevPage,

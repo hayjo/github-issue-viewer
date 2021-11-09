@@ -1,5 +1,33 @@
+const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
+const WEEK = 7 * DAY;
+const MONTH = 30 * DAY;
+const YEAR = 12 * MONTH;
+
 function parseDate(dateISOString) {
-  return dateISOString.slice(2, 10);
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+  const currentDate = new Date();
+  const date = new Date(dateISOString);
+  const difference = date - currentDate;
+  const absDifference = Math.abs(difference);
+
+  if (DAY > absDifference) {
+    return rtf.format(Math.floor(difference / HOUR), 'hour');
+  }
+
+  if (WEEK > absDifference) {
+    return rtf.format(Math.ceil(difference / DAY), 'day');
+  }
+
+  if (MONTH > absDifference) {
+    return rtf.format(Math.ceil(difference / WEEK), 'week');
+  }
+
+  if (YEAR > absDifference) {
+    return rtf.format(Math.ceil(difference / MONTH), 'month');
+  }
+
+  return rtf.format(Math.ceil(difference / YEAR), 'year');
 }
 
 // https://stackoverflow.com/questions/11867545/change-text-color-based-on-brightness-of-the-covered-background-area
