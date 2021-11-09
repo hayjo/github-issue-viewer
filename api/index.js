@@ -47,13 +47,15 @@ async function getIssuesByRepoFullName(fullName, page = 1) {
           ...issue,
           url: issue.html_url,
           number: issue.number * page,
-          repoName: fullName,
+          fullName,
           createdAt: issue.created_at,
           assignees: issue.assignees.map(({ avatar_url }) => avatar_url),
         })),
       ),
     );
   }
+
+  await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
 
   try {
     const response = await fetch(
@@ -77,7 +79,7 @@ async function getIssuesByRepoFullName(fullName, page = 1) {
         assignees,
       }) => ({
         id,
-        repoName: fullName,
+        fullName,
         number,
         title,
         url: html_url,

@@ -58,7 +58,7 @@ const IssueViewer: () => Element = ({ navigation }) => {
         <View style={styles.issueSection}>
           {list.map(
             ({
-              repoName,
+              fullName,
               number,
               title,
               url,
@@ -68,7 +68,7 @@ const IssueViewer: () => Element = ({ navigation }) => {
               assignees,
             }) => (
               <Card
-                key={`${repoName}#${number}`}
+                key={`${fullName}#${number}`}
                 onPress={() => handlePress(url)}>
                 <Icon
                   style={styles.issueIcon}
@@ -78,7 +78,7 @@ const IssueViewer: () => Element = ({ navigation }) => {
                 <View style={styles.issueCardContent}>
                   <View style={styles.issueCardHeader}>
                     <Text style={styles.repoName}>
-                      {repoName} #{number}
+                      {fullName} #{number}
                     </Text>
                   </View>
                   <Text style={styles.issueTitle}>{title}</Text>

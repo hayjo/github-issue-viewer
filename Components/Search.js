@@ -67,16 +67,20 @@ const Search: () => Element = ({ onCancel }) => {
   }, debouncingTime);
 
   const renderItem = ({ item }) => {
-    const { id, full_name: fullName, description } = item;
+    const { id, name, owner, description } = item;
+    const { id: ownerId, login: ownerName } = owner;
+    const fullName = `${ownerName}/${name}`;
 
     return (
-      <Card key={id} onPress={() => onSelectRepo(fullName)}>
+      <Card
+        key={id}
+        onPress={() => onSelectRepo({ id, name, ownerId, ownerName })}>
         <Icon style={styles.repoIcon} name="repo" size={SIZE.ICON} />
         <View style={styles.cardContent}>
           <Text style={styles.cardTitle}>{fullName}</Text>
           <Text numberOfLines={2}>{description}</Text>
         </View>
-        {selectedRepoList.includes(fullName) ? (
+        {selectedRepoList.find(repo => repo.id === id) ? (
           <View style={styles.checkIcon}>
             <Icon name="check" size={SIZE.ICON} color={COLORS.SELECTED} />
           </View>

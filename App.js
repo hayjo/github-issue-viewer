@@ -29,7 +29,7 @@ const Stack = createNativeStackNavigator();
 const App: () => Element = () => {
   const {
     list: repoList,
-    updateList: updateRepoList,
+    updateList,
     hasExceedLimit,
     confirmLimitNotice,
     error,
@@ -55,7 +55,7 @@ const App: () => Element = () => {
       value={{
         selectedRepoList: repoList,
         hasExceedLimit,
-        onSelectRepo: updateRepoList,
+        onSelectRepo: updateList,
         onNoticeClick: confirmLimitNotice,
         notifyError,
       }}>
