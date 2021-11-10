@@ -1,13 +1,7 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
+// @flow
 
 import React, { useState, useEffect } from 'react';
-import type { Element } from 'react';
+import type { Node } from 'react';
 import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -16,9 +10,9 @@ import Icon from 'react-native-vector-icons/Octicons';
 
 import useStoredList from './hooks/useStoredList';
 import { RepoContext } from './context';
-import IssueViewer from './Components/IssueViewer';
-import Repository from './Components/Repository';
-import Error from './Components/Error';
+import IssueViewer from './components/IssueViewer';
+import Repository from './components/Repository';
+import Error from './components/Error';
 import { LIMIT, SIZE } from './constants';
 
 Icon.loadFont();
@@ -26,7 +20,7 @@ enableScreens(true);
 
 const Stack = createNativeStackNavigator();
 
-const App: () => Element = () => {
+const App: () => Node = () => {
   const {
     list: repoList,
     updateList,

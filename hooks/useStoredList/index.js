@@ -1,35 +1,14 @@
+// @flow
+
 import { useEffect, useReducer } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { TUseStoredList } from './types';
+import reducer from './reducer';
 
-function reducer(state, action) {
-  switch (action.type) {
-    case 'SYNC_STORAGE_DATA':
-      const storageData = action.payload;
-
-      return { ...state, list: storageData };
-    case 'UPDATE':
-      const newItem = action.payload;
-      const updated = state.list.find(({ id }) => newItem.id === id)
-        ? state.list.filter(({ id }) => newItem.id !== id)
-        : [...state.list, newItem];
-
-      if (updated.length > state.limit) {
-        return { ...state, hasExceedLimit: true };
-      }
-
-      return { ...state, list: updated, hasExceedLimit: false };
-    case 'SET_ERROR':
-      const error = action.payload;
-
-      return { ...state, error };
-    case 'CONFIRM_LIMIT_EXCEED':
-      return { ...state, hasExceedLimit: false };
-    default:
-      return state;
-  }
-}
-
-const useStoredList = ({ key, limit }) => {
+const useStoredList: ({ key: string, limit: number }) => TUseStoredList = ({
+  key,
+  limit,
+}) => {
   const [{ list, hasExceedLimit, error }, dispatch] = useReducer(reducer, {
     list: [],
     hasExceedLimit: false,
@@ -37,7 +16,8 @@ const useStoredList = ({ key, limit }) => {
     error: '',
   });
 
-  const updateList = async item => dispatch({ type: 'UPDATE', payload: item });
+  const updateList: (item: { id: string }) => Promise<void> = async item =>
+    dispatch({ type: 'UPDATE', payload: item });
   const confirmLimitNotice = () => dispatch({ type: 'CONFIRM_LIMIT_EXCEED' });
 
   useEffect(() => {

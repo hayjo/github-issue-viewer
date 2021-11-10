@@ -1,3 +1,5 @@
+// @flow
+
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   SafeAreaView,
@@ -7,20 +9,27 @@ import {
   Text,
   TextInput,
   Button,
-  StyleSheet,
 } from 'react-native';
-import type { Element } from 'react';
+import type { Node } from 'react';
 import Icon from 'react-native-vector-icons/Octicons';
 import debounce from 'lodash.debounce';
-import Card from './Card';
-import SnackBar from './SnackBar';
-import { RepoContext } from '../context';
-import { searchRepoByQuery } from '../api';
-import { COLORS, MESSAGE, SIZE, LIMIT } from '../constants';
+
+import Card from '../common/Card';
+import SnackBar from '../common/SnackBar';
+
+import { RepoContext } from '../../context';
+import { searchRepoByQuery } from '../../api';
+import { COLORS, MESSAGE, SIZE, LIMIT } from '../../constants';
+
+import { viewStyles, textStyles } from './styles';
 
 Icon.loadFont();
 
-const Search: () => Element = ({ onCancel }) => {
+type Props = {
+  onCancel: () => void,
+};
+
+const Search: (props: Props) => Node = ({ onCancel }) => {
   const {
     selectedRepoList,
     onSelectRepo,
@@ -75,13 +84,13 @@ const Search: () => Element = ({ onCancel }) => {
       <Card
         key={id}
         onPress={() => onSelectRepo({ id, name, ownerId, ownerName })}>
-        <Icon style={styles.repoIcon} name="repo" size={SIZE.ICON} />
-        <View style={styles.cardContent}>
-          <Text style={styles.cardTitle}>{fullName}</Text>
+        <Icon style={textStyles.repoIcon} name="repo" size={SIZE.ICON} />
+        <View style={viewStyles.cardContent}>
+          <Text style={textStyles.cardTitle}>{fullName}</Text>
           <Text numberOfLines={2}>{description}</Text>
         </View>
         {selectedRepoList.find(repo => repo.id === id) ? (
-          <View style={styles.checkIcon}>
+          <View style={viewStyles.checkIconContainer}>
             <Icon name="check" size={SIZE.ICON} color={COLORS.SELECTED} />
           </View>
         ) : null}
@@ -90,7 +99,7 @@ const Search: () => Element = ({ onCancel }) => {
   };
 
   const listHeader = (
-    <Text style={styles.resultCount}>
+    <Text style={textStyles.resultCount}>
       {resultCount.toLocaleString()} repository results
     </Text>
   );
@@ -109,10 +118,10 @@ const Search: () => Element = ({ onCancel }) => {
   }, [searchQuery]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.searchBarContainer}>
-        <View style={styles.searchBar}>
-          <Icon name="search" style={styles.searchIcon} size={16} />
+    <SafeAreaView style={viewStyles.container}>
+      <View style={viewStyles.searchBarContainer}>
+        <View style={viewStyles.searchBar}>
+          <Icon name="search" style={textStyles.searchIcon} size={16} />
           <TextInput
             ref={ref}
             placeholder="Search Repository"
@@ -123,12 +132,12 @@ const Search: () => Element = ({ onCancel }) => {
         </View>
         <Button title="Cancel" onPress={onCancel} />
       </View>
-      <View style={styles.mainContainer}>
+      <View style={viewStyles.mainContainer}>
         <FlatList
           data={repoList}
-          style={styles.cardContainer}
+          style={viewStyles.cardContainer}
           renderItem={renderItem}
-          keyExtractor={({ id }) => id}
+          keyExtractor={({ id }) => String(id)}
           ListHeaderComponent={listHeader}
           ListFooterComponent={listFooter}
           onEndReached={() => searchRepositories(searchQuery, nextPage)}
@@ -143,65 +152,5 @@ const Search: () => Element = ({ onCancel }) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    height: '100%',
-    width: '100%',
-    flex: 1,
-  },
-  searchBarContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 12,
-    marginHorizontal: 12,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    flex: 1,
-    marginHorizontal: 4,
-    marginVertical: 2,
-    backgroundColor: COLORS.SEARCH_BACKGROUND,
-    borderRadius: 8,
-    overflow: 'hidden',
-    paddingRight: 4,
-  },
-  searchIcon: {
-    alignSelf: 'center',
-    marginHorizontal: 8,
-    color: COLORS.ICON,
-  },
-  mainContainer: {
-    flex: 1,
-  },
-  cardContainer: {
-    paddingHorizontal: 16,
-  },
-  resultCount: {
-    marginBottom: 12,
-    fontSize: 16,
-    color: COLORS.SUBTITLE,
-  },
-  repoIcon: {
-    marginLeft: 2,
-    marginRight: 8,
-    marginVertical: 5,
-    color: COLORS.ICON,
-  },
-  cardContent: {
-    padding: 2,
-    flex: 1,
-    overflow: 'hidden',
-  },
-  cardTitle: {
-    color: COLORS.TITLE,
-    fontSize: 16,
-  },
-  checkIcon: {
-    marginVertical: 5,
-    marginLeft: 4,
-    alignSelf: 'flex-start',
-  },
-});
 
 export default Search;

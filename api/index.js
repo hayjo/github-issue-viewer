@@ -1,10 +1,27 @@
+// @flow
+
 import { mockSearchRepoResult, mockIssues } from './mockData';
 import { MESSAGE, LIMIT } from '../constants';
 
 const useMock = false;
 const MOCK_DELAY = 500;
 
-async function searchRepoByQuery(query, page) {
+type Item = {
+  id: number,
+  name: string,
+  owner: { id: number, login: string },
+  description: string,
+};
+
+type TSearchRepoByQuery = Promise<{
+  totalCount: number,
+  items: Array<Item>,
+}>;
+
+async function searchRepoByQuery(
+  query: string,
+  page: number,
+): TSearchRepoByQuery {
   if (useMock) {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
 
@@ -37,7 +54,24 @@ async function searchRepoByQuery(query, page) {
   }
 }
 
-async function getIssuesByRepoFullName(fullName, page = 1) {
+type Issue = {
+  id: number,
+  fullName: string,
+  number: number,
+  title: string,
+  url: string,
+  labels: Array<{ id: number, name: string, color: string }>,
+  comments: number,
+  createdAt: Date,
+  assignees: Array<string>,
+};
+
+type TGetIssuesByRepoFullName = Promise<Issue[]>;
+
+async function getIssuesByRepoFullName(
+  fullName: string,
+  page: number = 1,
+): TGetIssuesByRepoFullName {
   if (useMock) {
     await new Promise(resolve => setTimeout(resolve, MOCK_DELAY));
 
@@ -48,7 +82,7 @@ async function getIssuesByRepoFullName(fullName, page = 1) {
           url: issue.html_url,
           number: issue.number * page,
           fullName,
-          createdAt: issue.created_at,
+          createdAt: new Date(issue.created_at),
           assignees: issue.assignees.map(({ avatar_url }) => avatar_url),
         })),
       ),
@@ -85,7 +119,7 @@ async function getIssuesByRepoFullName(fullName, page = 1) {
         url: html_url,
         labels,
         comments,
-        createdAt: created_at,
+        createdAt: new Date(created_at),
         assignees: assignees.map(({ avatar_url }) => avatar_url),
       }),
     );
@@ -96,4 +130,5 @@ async function getIssuesByRepoFullName(fullName, page = 1) {
   }
 }
 
+export type { Issue };
 export { searchRepoByQuery, getIssuesByRepoFullName };
