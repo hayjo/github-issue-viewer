@@ -9,6 +9,11 @@
     "test": "jest",
     "lint": "eslint ."
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hayjo/github-issue-viewer.git"
+  },
+  "author": "Hyun Jo <hay.hyunjo@gmail.com>",
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.15.11",
     "@react-navigation/native": "6.0.6",
