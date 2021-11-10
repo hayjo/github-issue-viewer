@@ -1,9 +1,18 @@
+// @flow
+
 import React from 'react';
-import type { Element } from 'react';
+import type { Node } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
+import type { ViewStyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
+
 import { COLORS } from '../constants';
 
-const Card: () => Element = ({ children, onPress }) => {
+type Props = {
+  children: Node,
+  onPress: () => void | Promise<void>,
+};
+
+const Card: (props: Props) => Node = ({ children, onPress }) => {
   return (
     <Pressable onPress={onPress} style={styles.card}>
       {children}
@@ -11,7 +20,7 @@ const Card: () => Element = ({ children, onPress }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const styles: { [string]: ViewStyleProp } = StyleSheet.create({
   card: {
     flexDirection: 'row',
     borderTopColor: COLORS.BORDER,

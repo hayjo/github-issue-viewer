@@ -1,29 +1,34 @@
+// @flow
+
 import React from 'react';
+import type { Node } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import type {
+  ViewStyleProp,
+  TextStyleProp,
+} from 'react-native/Libraries/StyleSheet/StyleSheet';
+
 import { COLORS } from '../constants';
 
-const Chip = ({ style, icon, text, textColor }) => {
-  const backgroundColor = style?.backgroundColor || COLORS.DEFAULT;
-  const borderColor =
-    backgroundColor === COLORS.DEFAULT ? COLORS.BORDER : backgroundColor;
-  const containerStyle = style
-    ? {
-        ...style,
-        backgroundColor,
-        borderColor: style?.borderColor || borderColor,
-      }
-    : styles.containerDefault;
-  const textStyle = textColor ? { color: textColor } : styles.textDefault;
+type Props = {
+  text: string,
+  textColor?: string,
+  icon?: Node,
+  style?: ViewStyleProp,
+};
+
+const Chip: (props: Props) => Node = ({ style, icon, text, textColor }) => {
+  const textStyle = { color: textColor || COLORS.TEXT };
 
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={[viewStyles.containerDefault, style, viewStyles.container]}>
       {icon && icon}
-      <Text style={[styles.text, textStyle]}>{text}</Text>
+      <Text style={[textStyles.text, textStyle]}>{text}</Text>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const viewStyles: { [string]: ViewStyleProp } = StyleSheet.create({
   container: {
     borderRadius: 12,
     flexDirection: 'row',
@@ -33,13 +38,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   containerDefault: {
+    backgroundColor: '#ffffff',
     borderColor: COLORS.BORDER,
   },
+});
+
+const textStyles: { [string]: TextStyleProp } = StyleSheet.create({
   text: {
     fontSize: 12,
-  },
-  textDefault: {
-    color: COLORS.TEXT,
   },
 });
 

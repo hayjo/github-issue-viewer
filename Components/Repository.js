@@ -1,5 +1,7 @@
+// @flow
+
 import React, { useContext, useState } from 'react';
-import type { Element } from 'react';
+import type { Node } from 'react';
 import {
   SafeAreaView,
   Button,
@@ -10,20 +12,26 @@ import {
   StyleSheet,
   Pressable,
 } from 'react-native';
+import type {
+  ViewStyleProp,
+  TextStyleProp,
+  ImageStyleProp,
+} from 'react-native/Libraries/StyleSheet/StyleSheet';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { RepoContext } from '../context';
 import Search from '../Components/Search';
 
+// import type { RootStackParamList } from '../types/nativeStack';
+import { RepoContext } from '../context';
 import { COLORS, SIZE } from '../constants';
 
 Icon.loadFont();
 
-function getProfileUrl(userId) {
+function getProfileUrl(userId: string): string {
   return `https://avatars.githubusercontent.com/u/${userId}?v=4`;
 }
 
-const Repository: () => Element = ({ navigation }) => {
+const Repository: () => Node = () => {
   const { selectedRepoList, onSelectRepo } = useContext(RepoContext);
   const [showSearch, setShowSearch] = useState(false);
 
@@ -48,7 +56,7 @@ const Repository: () => Element = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={viewStyles.container}>
       {showSearch ? (
         <Search onCancel={() => setShowSearch(false)} />
       ) : (
@@ -57,21 +65,21 @@ const Repository: () => Element = ({ navigation }) => {
             title="Search Repository"
             onPress={() => setShowSearch(true)}
           />
-          <View style={styles.cardContainer}>
+          <View style={viewStyles.cardContainer}>
             {selectedRepoList.map(({ id, name, ownerId, ownerName }) => (
               <Pressable
                 key={id}
-                style={styles.card}
+                style={viewStyles.card}
                 onPress={() => handleSelect(id)}>
-                <View style={styles.cardContent}>
+                <View style={viewStyles.cardContent}>
                   <Image
                     key={id}
                     source={{ uri: getProfileUrl(ownerId) }}
-                    style={styles.avatar}
+                    style={imageStyles.avatar}
                   />
-                  <View style={styles.cardText}>
-                    <Text style={styles.repoOwner}>{ownerName}</Text>
-                    <Text style={styles.repoName}>{name}</Text>
+                  <View style={viewStyles.cardTextContainer}>
+                    <Text style={textStyles.repoOwner}>{ownerName}</Text>
+                    <Text style={textStyles.repoName}>{name}</Text>
                   </View>
                 </View>
                 <Icon color={COLORS.BORDER} name="close" size={SIZE.ICON} />
@@ -84,7 +92,7 @@ const Repository: () => Element = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const viewStyles: { [string]: ViewStyleProp } = StyleSheet.create({
   container: {
     backgroundColor: COLORS.DEFAULT,
     width: '100%',
@@ -108,22 +116,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  avatar: {
-    height: 40,
-    width: 40,
-    borderRadius: 40,
-    marginHorizontal: 4,
-    marginVertical: 4,
-  },
-  cardText: {
+  cardTextContainer: {
     marginHorizontal: 12,
   },
+});
+
+const textStyles: { [string]: TextStyleProp } = StyleSheet.create({
   repoOwner: {
     color: COLORS.TEXT,
   },
   repoName: {
     marginTop: 4,
     fontSize: 16,
+  },
+});
+
+const imageStyles: { [string]: ImageStyleProp } = StyleSheet.create({
+  avatar: {
+    height: 40,
+    width: 40,
+    borderRadius: 40,
+    marginHorizontal: 4,
+    marginVertical: 4,
   },
 });
 

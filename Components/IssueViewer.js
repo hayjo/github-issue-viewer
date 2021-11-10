@@ -1,26 +1,36 @@
+// @flow
+
 import React, { useState, useEffect } from 'react';
-import type { Element } from 'react';
+import type { Node } from 'react';
 import {
   SafeAreaView,
   ScrollView,
   Linking,
   ActivityIndicator,
+  Pressable,
   View,
   Image,
   Text,
   StyleSheet,
 } from 'react-native';
+import type {
+  ViewStyleProp,
+  TextStyleProp,
+  ImageStyleProp,
+} from 'react-native/Libraries/StyleSheet/StyleSheet';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import Card from './Card';
 import Chip from './Chip';
 import SnackBar from './SnackBar';
+
 import useAggregatedIssueList from '../hooks/useAggregatedIssueList';
 import { parseDate, getContrastYIQ } from '../utils';
 import { COLORS, LIMIT } from '../constants';
 
 Icon.loadFont();
 
-const IssueViewer: () => Element = ({ navigation }) => {
+const IssueViewer: () => Node = () => {
   const {
     list,
     page,
@@ -53,9 +63,9 @@ const IssueViewer: () => Element = ({ navigation }) => {
   }, [fetchingError]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.issueListContainer}>
-        <View style={styles.issueSection}>
+    <SafeAreaView style={viewStyles.container}>
+      <ScrollView style={viewStyles.issueListContainer}>
+        <View style={viewStyles.issueSection}>
           {list.map(
             ({
               fullName,
@@ -71,43 +81,44 @@ const IssueViewer: () => Element = ({ navigation }) => {
                 key={`${fullName}#${number}`}
                 onPress={() => handlePress(url)}>
                 <Icon
-                  style={styles.issueIcon}
+                  style={textStyles.issueIcon}
                   name="record-circle-outline"
                   size={20}
+                  color={COLORS.ISSUE}
                 />
-                <View style={styles.issueCardContent}>
-                  <View style={styles.issueCardHeader}>
-                    <Text style={styles.repoName}>
+                <View style={viewStyles.issueCardContent}>
+                  <View style={viewStyles.issueCardHeader}>
+                    <Text style={textStyles.repoName}>
                       {fullName} #{number}
                     </Text>
                   </View>
-                  <Text style={styles.issueTitle}>{title}</Text>
-                  <View style={styles.chipContainer}>
+                  <Text style={textStyles.issueTitle}>{title}</Text>
+                  <View style={viewStyles.chipContainer}>
                     {labels.map(({ name, id, color }) => (
                       <Chip
                         key={id}
-                        style={{
-                          backgroundColor: `#${color}`,
-                          ...styles.labelChip,
-                        }}
+                        style={[
+                          { backgroundColor: `#${color}` },
+                          viewStyles.labelChip,
+                        ]}
                         text={name}
                         textColor={getContrastYIQ(color)}
                       />
                     ))}
                   </View>
-                  <View style={styles.chipContainer}>
+                  <View style={viewStyles.chipContainer}>
                     {assignees.length ? (
-                      <View style={styles.assigneeContainer}>
+                      <View style={viewStyles.assigneeContainer}>
                         {assignees.slice(0, 2).map(uri => (
                           <Image
                             key={uri}
                             source={{ uri }}
-                            style={styles.assigneeAvatar}
+                            style={imageStyles.assigneeAvatar}
                           />
                         ))}
                         {assignees.length > 2 ? (
                           <Chip
-                            style={styles.assigneeCountChip}
+                            style={viewStyles.assigneeCountChip}
                             text={`+${assignees.length - 2}`}
                           />
                         ) : null}
@@ -115,56 +126,50 @@ const IssueViewer: () => Element = ({ navigation }) => {
                     ) : null}
                     {comments ? (
                       <Chip
-                        style={styles.comment}
+                        style={viewStyles.comment}
                         icon={
                           <Icon
                             name="comment-multiple-outline"
                             size={14}
                             color={COLORS.TEXT}
-                            style={styles.commentIcon}
+                            style={textStyles.commentIcon}
                           />
                         }
-                        text={comments}
+                        text={String(comments)}
                       />
                     ) : null}
                   </View>
                 </View>
-                <Text style={styles.time}>{parseDate(createdAt)}</Text>
+                <Text style={textStyles.time}>{parseDate(createdAt)}</Text>
               </Card>
             ),
           )}
         </View>
       </ScrollView>
-      <View style={styles.pageNavigator}>
+      <View style={viewStyles.pageNavigator}>
         {isFetching ? (
           <ActivityIndicator />
         ) : (
           <>
-            <Text onPress={() => movePage(0)}>
+            <Pressable onPress={() => movePage(0)}>
               <Icon name="chevron-double-left" size={24} color={COLORS.TEXT} />
-            </Text>
-            <Text style={styles.chevron} onPress={movePrevPage}>
+            </Pressable>
+            <Pressable style={viewStyles.chevron} onPress={movePrevPage}>
               <Icon name="chevron-left" size={24} color={COLORS.TEXT} />
-            </Text>
+            </Pressable>
             <Text>page {page + 1}</Text>
-            <Text style={styles.chevron} onPress={moveNextPage}>
+            <Pressable style={viewStyles.chevron} onPress={moveNextPage}>
               <Icon name="chevron-right" size={24} color={COLORS.TEXT} />
-            </Text>
+            </Pressable>
           </>
         )}
       </View>
-      {error ? (
-        <SnackBar
-          onPress={() => {}}
-          style={styles.noticeSnackBar}
-          text={error}
-        />
-      ) : null}
+      {error ? <SnackBar onPress={() => {}} text={error} /> : null}
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const viewStyles: { [string]: ViewStyleProp } = StyleSheet.create({
   container: {
     backgroundColor: COLORS.DEFAULT,
     height: '100%',
@@ -188,11 +193,6 @@ const styles = StyleSheet.create({
     paddingRight: 5,
     paddingVertical: 10,
   },
-  issueIcon: {
-    marginLeft: 2,
-    marginRight: 8,
-    color: '#1a7f37',
-  },
   issueCardContent: {
     flex: 1,
   },
@@ -200,6 +200,39 @@ const styles = StyleSheet.create({
     marginTop: 2,
     flexDirection: 'row',
   },
+  chipContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    marginTop: 4,
+  },
+  labelChip: {
+    marginRight: 4,
+    marginTop: 4,
+  },
+  comment: {
+    marginVertical: 4,
+  },
+  assigneeContainer: {
+    flexDirection: 'row',
+    margin: 4,
+  },
+  assigneeCountChip: {
+    paddingHorizontal: 5,
+    paddingVertical: 0,
+    borderRadius: 16,
+    marginLeft: -6,
+    borderWidth: 2,
+    borderColor: COLORS.DEFAULT,
+    backgroundColor: COLORS.SEARCH_BACKGROUND,
+  },
+  chevron: {
+    marginHorizontal: 20,
+    marginVertical: 8,
+  },
+});
+
+const textStyles: { [string]: TextStyleProp } = StyleSheet.create({
   repoName: {
     marginRight: 4,
     marginBottom: 4,
@@ -216,27 +249,17 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: '500',
   },
-  chipContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-    marginTop: 4,
-  },
-  labelChip: {
-    marginRight: 4,
-    marginTop: 4,
-  },
-  comment: {
-    marginVertical: 4,
+  issueIcon: {
+    marginLeft: 2,
+    marginRight: 8,
   },
   commentIcon: {
     marginRight: 4,
     marginTop: 1,
   },
-  assigneeContainer: {
-    flexDirection: 'row',
-    margin: 4,
-  },
+});
+
+const imageStyles: { [string]: ImageStyleProp } = StyleSheet.create({
   assigneeAvatar: {
     width: 20,
     height: 20,
@@ -248,19 +271,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.DEFAULT,
     backgroundColor: COLORS.DEFAULT,
-  },
-  assigneeCountChip: {
-    paddingHorizontal: 5,
-    paddingVertical: 0,
-    borderRadius: 16,
-    marginLeft: -6,
-    borderWidth: 2,
-    borderColor: COLORS.DEFAULT,
-    backgroundColor: COLORS.SEARCH_BACKGROUND,
-  },
-  chevron: {
-    marginHorizontal: 20,
-    marginVertical: 8,
   },
 });
 
