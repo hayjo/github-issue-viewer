@@ -5,7 +5,7 @@ import type { Node } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import type { ViewStyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 
-import { COLORS } from '../constants';
+import { COLORS } from '../../constants';
 
 type Props = {
   children: Node,

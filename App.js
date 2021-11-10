@@ -10,9 +10,9 @@ import Icon from 'react-native-vector-icons/Octicons';
 
 import useStoredList from './hooks/useStoredList';
 import { RepoContext } from './context';
-import IssueViewer from './Components/IssueViewer';
-import Repository from './Components/Repository';
-import Error from './Components/Error';
+import IssueViewer from './components/IssueViewer';
+import Repository from './components/Repository';
+import Error from './components/Error';
 import { LIMIT, SIZE } from './constants';
 
 Icon.loadFont();
