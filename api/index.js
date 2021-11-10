@@ -3,7 +3,7 @@
 import { mockSearchRepoResult, mockIssues } from './mockData';
 import { MESSAGE, LIMIT } from '../constants';
 
-const useMock = false;
+const useMock = process.env.NODE_ENV === 'test';
 const MOCK_DELAY = 500;
 
 type Item = {
