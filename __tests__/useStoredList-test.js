@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import useStoredList from '../hooks/useStoredList';
+import useStoredList from '../src/hooks/useStoredList';
 
 const mockData = { id: 'string', name: 'name' };
 const LIST_LIMIT = 2;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import useAggregatedIssueList from '../hooks/useAggregatedIssueList';
-import * as api from '../api';
+import useAggregatedIssueList from '../src/hooks/useAggregatedIssueList';
+import * as api from '../src/api';
 
 const PER_PAGE = 2;
 const initialData = {

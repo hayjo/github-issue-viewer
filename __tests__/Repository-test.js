@@ -1,8 +1,8 @@
 import 'react-native';
 import React from 'react';
 import renderer from 'react-test-renderer';
-import Repository from '../components/Repository';
-import { RepoContext } from '../context';
+import Repository from '../src/components/Repository';
+import { RepoContext } from '../src/context';
 
 const initialData = {
   selectedRepoList: [],
