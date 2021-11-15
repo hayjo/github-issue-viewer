@@ -6,7 +6,7 @@ const WEEK = 7 * DAY;
 const MONTH = 30 * DAY;
 const YEAR = 12 * MONTH;
 
-function formatHelper(time: number, timeUnit: string): number {
+function formatHelper(time: number, timeUnit: string): string {
   const absTime = Math.abs(time);
 
   if (absTime > 1) {
@@ -25,12 +25,15 @@ function formatHelper(time: number, timeUnit: string): number {
     case 'year':
       return 'year';
   }
+
+  return '';
 }
 
-function parseDate(dateISOString: string): string {
+function parseDate(dateISOString: Date): string {
   let formatTime: function;
 
   if (typeof Intl === 'object' && Intl?.hasOwnProperty('RelativeTimeFormat')) {
+    // $FlowFixMe: Cannot get `Intl.RelativeTimeFormat` because property `RelativeTimeFormat` is missing in  object type [1]
     const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 
     formatTime = rtf.format.bind(rtf);
