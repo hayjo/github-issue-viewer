@@ -5,6 +5,7 @@ const MESSAGE: { [string]: string } = {
   TEMPORARILY_UNAVAILABLE: '잠시 후 다시 시도해주세요.',
   MAX_REPO_COUNT:
     '더 이상 Repository를 등록할 수 없습니다.\n기존 Repository를 삭제하고 다시 시도해주세요.',
+  CANNOT_OPEN_PAGE: '페이지를 열 수 없습니다.',
 };
 
 const LIMIT: { [string]: number } = {

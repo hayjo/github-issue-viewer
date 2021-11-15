@@ -12,7 +12,7 @@ import {
   Image,
   Text,
 } from 'react-native';
-
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Card from '../common/Card';
@@ -21,13 +21,22 @@ import SnackBar from '../common/SnackBar';
 
 import useAggregatedIssueList from '../../hooks/useAggregatedIssueList';
 import { parseDate, getContrastYIQ } from '../../utils';
-import { COLORS, LIMIT } from '../../constants';
+import { COLORS, LIMIT, MESSAGE } from '../../constants';
 
 import { viewStyles, textStyles, imageStyles } from './styles';
 
 Icon.loadFont();
 
-const IssueViewer: () => Node = () => {
+type RootStackParamList = {
+  Issue: 'undefined',
+  Repository: 'undefined',
+  Browser: { uri: string, title: string | 'undefined' },
+};
+
+// $FlowFixMe: Cannot use `NativeStackScreenProps` as a type because it is an `any`-typed value.
+type Props = NativeStackScreenProps<RootStackParamList, 'IssueViewer'>;
+
+const IssueViewer: (props: Props) => Node = ({ navigation }) => {
   const {
     list,
     page,
@@ -38,19 +47,15 @@ const IssueViewer: () => Node = () => {
     movePage,
   } = useAggregatedIssueList({ perPage: LIMIT.ISSUE_PER_PAGE });
   const [error, setError] = useState('');
-  const handlePress = async url => {
-    const supported = await Linking.canOpenURL(url);
+  const handlePress = async (uri, title) => {
+    const supported = await Linking.canOpenURL(uri);
 
     if (!supported) {
-      setError(`${url} 페이지를 열 수 없습니다.`);
+      setError(`${uri} ${MESSAGE.CANNOT_OPEN_PAGE}`);
       return;
     }
 
-    try {
-      await Linking.openURL(url);
-    } catch {
-      setError(`${url} 페이지를 열 수 없습니다.`);
-    }
+    navigation.navigate('Browser', { uri, title });
   };
 
   useEffect(() => {
@@ -76,7 +81,7 @@ const IssueViewer: () => Node = () => {
             }) => (
               <Card
                 key={`${fullName}#${number}`}
-                onPress={() => handlePress(url)}>
+                onPress={() => handlePress(url, `#${number}`)}>
                 <Icon
                   style={textStyles.issueIcon}
                   name="record-circle-outline"
