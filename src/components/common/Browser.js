@@ -7,14 +7,8 @@ import { WebView } from 'react-native-webview';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { ViewStyleProp } from 'react-native/Libraries/StyleSheet/StyleSheet';
 import SnackBar from './SnackBar';
-
+import type { RootStackParamList } from '../../types';
 import { COLORS, MESSAGE } from '../../constants';
-
-type RootStackParamList = {
-  Issue: 'undefined',
-  Repository: 'undefined',
-  Browser: { uri: string, title: string | 'undefined' },
-};
 
 // $FlowFixMe: Cannot use `NativeStackScreenProps` as a type because it is an `any`-typed value.
 type Props = NativeStackScreenProps<RootStackParamList, 'Browser'>;

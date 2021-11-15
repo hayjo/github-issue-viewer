@@ -15,15 +15,10 @@ import Repository from './components/Repository';
 import Browser from './components/common/Browser';
 import Error from './components/Error';
 import { LIMIT, SIZE } from './constants';
+import type { RootStackParamList } from './types';
 
 Icon.loadFont();
 enableScreens(true);
-
-type RootStackParamList = {
-  Issue: 'undefined',
-  Repository: 'undefined',
-  Browser: { uri: string, title: string | 'undefined' },
-};
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 

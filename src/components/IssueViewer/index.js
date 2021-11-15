@@ -22,16 +22,10 @@ import SnackBar from '../common/SnackBar';
 import useAggregatedIssueList from '../../hooks/useAggregatedIssueList';
 import { parseDate, getContrastYIQ } from '../../utils';
 import { COLORS, LIMIT, MESSAGE } from '../../constants';
-
+import type { RootStackParamList } from '../../types';
 import { viewStyles, textStyles, imageStyles } from './styles';
 
 Icon.loadFont();
-
-type RootStackParamList = {
-  Issue: 'undefined',
-  Repository: 'undefined',
-  Browser: { uri: string, title: string | 'undefined' },
-};
 
 // $FlowFixMe: Cannot use `NativeStackScreenProps` as a type because it is an `any`-typed value.
 type Props = NativeStackScreenProps<RootStackParamList, 'IssueViewer'>;
