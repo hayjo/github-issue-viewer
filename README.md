@@ -57,4 +57,4 @@ $ npx react-native run-android
 #### 아쉬운 점
 - 초반에 useMemo, useCallback 등을 사용한 최적화를 시도했으나, 커스텀 훅을 도입하면서 업데이터 함수가 dispatch로 대체돼 이 부분을 걷어내었습니다. 이후 별도의 렌더링 최적화를 적극적으로 시도하지 못한 부분이 아쉽습니다.
 - Async Storage 접근 등 side effect가 발생하는 로직을 커스텀 훅에서 처리하기 위해 상태 관리 라이브러리 대신 useReducer를 사용했는데, state depth가 깊어지면서 불변성을 보장하기 위한 코드가 많아졌습니다. 특히 useAggregatedIssueList 훅에서 immer를 사용했다면 reducer 로직이 훨씬 간결해질 수 있었을 것 같아 아쉬움이 남습니다.
-- 이슈 클릭 시 해당 페이지로 이동하는 부분을 deep link로 구현해보고 싶었고, 그래서 stack navigation을 선택했었으나 현재 단계에서 완성되지 않아 아쉽습니다. 이후 시도할 예정입니다.
+- 이슈 클릭 시 해당 페이지로 이동하는 부분을 deep link로 구현해보고 싶었고, 그래서 stack navigation을 선택했었으나 현재 단계에서 완성되지 않아 아쉽습니다. 이후 시도할 예정입니다. (2021. 11. 15에 해결)

@@ -12,13 +12,15 @@ import useStoredList from './hooks/useStoredList';
 import { RepoContext } from './context';
 import IssueViewer from './components/IssueViewer';
 import Repository from './components/Repository';
+import Browser from './components/common/Browser';
 import Error from './components/Error';
 import { LIMIT, SIZE } from './constants';
+import type { RootStackParamList } from './types';
 
 Icon.loadFont();
 enableScreens(true);
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const App: () => Node = () => {
   const {
@@ -70,6 +72,11 @@ const App: () => Node = () => {
               })}
             />
             <Stack.Screen name="Repository" component={Repository} />
+            <Stack.Screen
+              name="Browser"
+              component={Browser}
+              options={({ route }) => ({ title: route.params.title })}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       )}

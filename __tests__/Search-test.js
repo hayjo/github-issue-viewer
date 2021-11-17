@@ -1,8 +1,8 @@
 import 'react-native';
 import React from 'react';
 import renderer from 'react-test-renderer';
-import Search from '../components/Search';
-import { RepoContext } from '../context';
+import Search from '../src/components/Search';
+import { RepoContext } from '../src/context';
 
 const initialData = {
   selectedRepoList: [],

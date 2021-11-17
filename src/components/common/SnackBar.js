@@ -55,6 +55,7 @@ const viewStyles: { [string]: ViewStyleProp } = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     bottom: '50%',
+    zIndex: 10,
   },
   defaultSnackBar: {
     padding: 10,
